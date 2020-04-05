@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #define RGBLIGHT_LAYERS
 #define TAPPING_TERM 200
+#define DYNAMIC_MACRO_NO_NESTING
 
 // Incompatible with link time optimization
 #define NO_ACTION_MACRO
