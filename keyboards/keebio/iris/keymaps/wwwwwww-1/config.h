@@ -21,8 +21,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define EE_HANDS
 
 #define RGBLIGHT_LAYERS
-#define TAPPING_TERM 200
 #define DYNAMIC_MACRO_NO_NESTING
+#define ONESHOT_TIMEOUT 500
+#define ONESHOT_TAP_TOGGLE 2
 
 // Incompatible with link time optimization
 #define NO_ACTION_MACRO
