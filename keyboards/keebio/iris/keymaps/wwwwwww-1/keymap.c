@@ -8,6 +8,9 @@
 #define RGB_RMD RGB_RMOD
 #define OS_LSFT OSM(MOD_LSFT)
 #define OS_RSFT OSM(MOD_RSFT)
+#define OS_LGUI OSM(MOD_LGUI)
+#define OS_LCTL OSM(MOD_LCTL)
+#define OS_RALT OSM(MOD_RALT)
 
 bool lowerlock_state = false;
 bool raiselock_state = false;
@@ -29,11 +32,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
      KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                               KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_BSLS,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_LGUI, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                               KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
+     OS_LGUI, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                               KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     OS_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_GRV,           KC_DEL,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, OS_RSFT,
+     OS_LSFT, KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_GRV,           KC_DEL,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, OS_LSFT,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                    KC_LCTL, LOWER,   KC_SPC,                    KC_ENT,  RAISE,   KC_RALT
+                                    OS_LCTL, LOWER,   KC_SPC,                    KC_ENT,  RAISE,   OS_RALT
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
   ),
 
@@ -155,28 +158,37 @@ void encoder_update_user(uint8_t index, bool clockwise) {
     }
 }
 
-// Light the 4 LEDs closest to the center
-const rgblight_segment_t PROGMEM my_capslock_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {0, 1, HSV_RED},
-    {5, 1, HSV_RED},
-    {6, 1, HSV_RED},
-    {11, 1, HSV_RED}
+const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {5, 1, HSV_RED}
 );
 
-// Light the bottom 3 LEDs on the left half
+const rgblight_segment_t PROGMEM my_gui_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {0, 1, HSV_BLUE}
+);
+
+const rgblight_segment_t PROGMEM my_ctrl_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {6, 1, HSV_PURPLE}
+);
+
+const rgblight_segment_t PROGMEM my_alt_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+    {11, 1, HSV_GREEN}
+);
+
 const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {3, 3, HSV_GOLD}
+    {0, 6, HSV_GOLD}
 );
 
-// Light the bottom 3 LEDs on the right half
 const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {6, 3, HSV_SPRINGGREEN}
+    {6, 6, HSV_SPRINGGREEN}
 );
 
 const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
-    my_capslock_layer,
     my_layer1_layer,
-    my_layer2_layer
+    my_layer2_layer,
+    my_gui_layer,
+    my_shift_layer,
+    my_ctrl_layer,
+    my_alt_layer
 );
 
 void keyboard_post_init_user(void) {
@@ -184,13 +196,15 @@ void keyboard_post_init_user(void) {
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
-    // Both layers will light up if both kb layers are active
-    rgblight_set_layer_state(1, layer_state_cmp(state, 1));
-    rgblight_set_layer_state(2, layer_state_cmp(state, 2));
+    rgblight_set_layer_state(0, layer_state_cmp(state, 1));
+    rgblight_set_layer_state(1, layer_state_cmp(state, 2));
     return state;
 }
 
-void oneshot_locked_mods_changed_user(uint8_t mods) {
-    rgblight_set_layer_state(0, mods & MOD_MASK_SHIFT);
+void oneshot_mods_changed_user(uint8_t mods) {
+    rgblight_set_layer_state(2, mods & MOD_MASK_GUI);
+    rgblight_set_layer_state(3, mods & MOD_MASK_SHIFT);
+    rgblight_set_layer_state(4, mods & MOD_MASK_CTRL);
+    rgblight_set_layer_state(5, mods & MOD_MASK_ALT);
 }
 
