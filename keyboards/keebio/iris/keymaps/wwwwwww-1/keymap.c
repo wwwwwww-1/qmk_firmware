@@ -22,8 +22,6 @@ enum custom_keycodes {
   LOWER,
   RAISE,
   ADJUST,
-  LWR_LCK,
-  RAI_LCK,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -62,7 +60,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
      KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                               KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_BSPC,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     LWR_LCK, _______, KC_LEFT, KC_RGHT, KC_UP,   KC_LBRC,                            KC_RBRC, KC_P4,   KC_P5,   KC_P6,   KC_PLUS, KC_EQL,
+     _______, _______, KC_LEFT, KC_RGHT, KC_UP,   KC_LBRC,                            KC_RBRC, KC_P4,   KC_P5,   KC_P6,   KC_PLUS, KC_EQL,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
      _______, _______, _______, _______, KC_DOWN, KC_LCBR, KC_LPRN,          KC_RPRN, KC_RCBR, KC_P1,   KC_P2,   KC_P3,   KC_MINS, KC_UNDS,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
@@ -74,11 +72,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
      KC_F12,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                              KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     _______, _______, _______, _______, _______, _______,                            KC_PGUP, KC_HOME, KC_UP,   KC_END,  _______, _______,
+     _______, _______, _______, _______, _______, _______,                            _______, KC_HOME, KC_END,  _______, _______, _______,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     _______, KC_MPRV, KC_MNXT, KC_VOLU, _______, _______,                            KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, _______, RAI_LCK,
+     _______, KC_MPRV, KC_MNXT, KC_VOLU, _______, _______,                            KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, _______, _______,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_MUTE, KC_MSTP, KC_MPLY, KC_VOLD, _______, _______, _______,          _______, _______, _______, _______, _______, _______, _______,
+     KC_MUTE, KC_MSTP, KC_MPLY, KC_VOLD, _______, _______, _______,          _______, _______, KC_PGDN, KC_PGUP, _______, _______, _______,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                     _______, _______, _______,                   _______, _______, _______
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
@@ -115,27 +113,29 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
     case LOWER:
       if (record->event.pressed) {
-        layer_on(_LOWER);
-        update_tri_layer(_LOWER, _RAISE, _ADJUST);
-      } else {
 	if (!lowerlock_state) {
+          layer_on(_LOWER);
+          update_tri_layer(_LOWER, _RAISE, _ADJUST);
+	  lowerlock_state = true;
+	} else {
 	  layer_off(_LOWER);
           update_tri_layer(_LOWER, _RAISE, _ADJUST);
+	  lowerlock_state = false;
 	}
-	lowerlock_state = false;
       }
       return false;
       break;
     case RAISE:
       if (record->event.pressed) {
-        layer_on(_RAISE);
-        update_tri_layer(_LOWER, _RAISE, _ADJUST);
-      } else {
-        if (!raiselock_state) {
-          layer_off(_RAISE);
+	if (!raiselock_state) {
+          layer_on(_RAISE);
           update_tri_layer(_LOWER, _RAISE, _ADJUST);
+	  raiselock_state = true;
+	} else {
+	  layer_off(_RAISE);
+          update_tri_layer(_LOWER, _RAISE, _ADJUST);
+	  raiselock_state = false;
 	}
-	raiselock_state = false;
       }
       return false;
       break;
@@ -144,18 +144,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         layer_on(_ADJUST);
       } else {
         layer_off(_ADJUST);
-      }
-      return false;
-      break;
-    case LWR_LCK:
-      if (record->event.pressed) {
-	lowerlock_state = true;
-      }
-      return false;
-      break;
-    case RAI_LCK:
-      if (record->event.pressed) {
-	raiselock_state = true;
       }
       return false;
       break;
@@ -215,7 +203,9 @@ const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
 
 void keyboard_post_init_user(void) {
     rgblight_layers = my_rgb_layers;
-    set_single_persistent_default_layer(_QWERTY);
+    set_single_persistent_default_layer(_WORKMAN);
+    layer_off(_LOWER);
+    layer_off(_RAISE);
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
