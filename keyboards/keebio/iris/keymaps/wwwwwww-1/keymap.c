@@ -13,8 +13,8 @@
 #define OS_LCTL OSM(MOD_LCTL)
 #define OS_RALT OSM(MOD_RALT)
 
-bool lowerlock_state = false;
-bool raiselock_state = false;
+uint16_t lower_timer;
+uint16_t raise_timer;
 
 enum custom_keycodes {
   QWERTY = SAFE_RANGE,
@@ -113,28 +113,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
     case LOWER:
       if (record->event.pressed) {
-	if (!lowerlock_state) {
-          layer_on(_LOWER);
-          update_tri_layer(_LOWER, _RAISE, _ADJUST);
-	  lowerlock_state = true;
+	if (layer_state_is(_LOWER)) {
+	  layer_clear();
+	  update_tri_layer(_LOWER, _RAISE, _ADJUST);
 	} else {
+	  layer_on(_LOWER);
+	  update_tri_layer(_LOWER, _RAISE, _ADJUST);
+	  lower_timer = timer_read();
+	}
+      } else {
+	if (timer_elapsed(lower_timer) > 100) {
 	  layer_off(_LOWER);
-          update_tri_layer(_LOWER, _RAISE, _ADJUST);
-	  lowerlock_state = false;
+	  update_tri_layer(_LOWER, _RAISE, _ADJUST);
 	}
       }
       return false;
       break;
     case RAISE:
       if (record->event.pressed) {
-	if (!raiselock_state) {
-          layer_on(_RAISE);
-          update_tri_layer(_LOWER, _RAISE, _ADJUST);
-	  raiselock_state = true;
+	if (layer_state_is(_RAISE)) {
+	  layer_clear();
+	  update_tri_layer(_LOWER, _RAISE, _ADJUST);
 	} else {
+	  layer_on(_RAISE);
+	  update_tri_layer(_LOWER, _RAISE, _ADJUST);
+	  raise_timer = timer_read();
+	}
+      } else {
+	if (timer_elapsed(raise_timer) > 100) {
 	  layer_off(_RAISE);
-          update_tri_layer(_LOWER, _RAISE, _ADJUST);
-	  raiselock_state = false;
+	  update_tri_layer(_LOWER, _RAISE, _ADJUST);
 	}
       }
       return false;
@@ -204,8 +212,7 @@ const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
 void keyboard_post_init_user(void) {
     rgblight_layers = my_rgb_layers;
     set_single_persistent_default_layer(_WORKMAN);
-    layer_off(_LOWER);
-    layer_off(_RAISE);
+    layer_clear();
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
