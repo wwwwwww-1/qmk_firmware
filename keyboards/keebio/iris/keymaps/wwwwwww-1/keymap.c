@@ -3,7 +3,7 @@
 
 #define _WORKMAN 0
 #define _SYMBOL 1
-#define _RAISE 2
+#define _ARROW 2
 #define _ADJUST 3
 #define RGB_RMD RGB_RMOD
 #define OS_LSFT OSM(MOD_LSFT)
@@ -11,6 +11,7 @@
 #define OS_RGUI OSM(MOD_RGUI)
 #define OS_RALT OSM(MOD_RALT)
 #define OS_SYM OSL(_SYMBOL)
+#define TAB_AR LT(_ARROW, KC_TAB)
 
 uint16_t lower_timer;
 uint16_t raise_timer;
@@ -19,7 +20,7 @@ bool queue = true;
 enum custom_keycodes {
   WORKMAN = SAFE_RANGE,
   SYMBOL,
-  RAISE,
+  ARROW,
   ADJUST,
 };
 
@@ -31,9 +32,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
      KC_GRV,  KC_Q,    KC_D,    KC_R,    KC_W,    KC_B,                               KC_J,    KC_F,    KC_U,    KC_P,    KC_SCLN, KC_BSPC,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     KC_TAB,  KC_A,    KC_S,    KC_H,    KC_T,    KC_G,                               KC_Y,    KC_N,    KC_E,    KC_O,    KC_I,    KC_QUOT,
+     TAB_AR,  KC_A,    KC_S,    KC_H,    KC_T,    KC_G,                               KC_Y,    KC_N,    KC_E,    KC_O,    KC_I,    KC_QUOT,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     OS_SYM,  KC_Z,    KC_X,    KC_M,    KC_C,    KC_V,    KC_ESC,           RAISE,   KC_K,    KC_L,    KC_COMM, KC_DOT,  KC_SLSH, KC_BSLS,
+     OS_SYM,  KC_Z,    KC_X,    KC_M,    KC_C,    KC_V,    KC_ESC,           ARROW,   KC_K,    KC_L,    KC_COMM, KC_DOT,  KC_SLSH, KC_BSLS,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                     OS_LCTL, OS_LSFT, KC_SPC,                    KC_ENT,  OS_RGUI, OS_RALT
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
@@ -53,15 +54,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
   ),
 
-  [_RAISE] = LAYOUT(
+  [_ARROW] = LAYOUT(
   //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-     KC_F12,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                              KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,
+     _______, _______, _______, _______, _______, _______,                            _______, _______, _______, _______, _______, _______,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
      _______, _______, _______, _______, _______, _______,                            _______, KC_HOME, KC_END,  _______, _______, _______,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
-     _______, KC_MPRV, KC_MNXT, KC_VOLU, _______, _______,                            KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, _______, _______,
+     _______, _______, _______, _______, _______, _______,                            KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, _______, _______,
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
-     SYMBOL, KC_MSTP, KC_MPLY, KC_VOLD, _______, _______, _______,          _______, _______, KC_PGDN, KC_PGUP, _______, _______, _______,
+     SYMBOL,  _______, _______, _______, _______, _______, _______,          _______, _______, KC_PGDN, KC_PGUP, _______, _______, _______,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
                                     _______, _______, _______,                   _______, _______, _______
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
@@ -94,34 +95,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
 	if (layer_state_is(_SYMBOL)) {
 	  layer_clear();
-	  update_tri_layer(_SYMBOL, _RAISE, _ADJUST);
+	  update_tri_layer(_SYMBOL, _ARROW, _ADJUST);
 	} else {
 	  layer_on(_SYMBOL);
-	  update_tri_layer(_SYMBOL, _RAISE, _ADJUST);
+	  update_tri_layer(_SYMBOL, _ARROW, _ADJUST);
 	  lower_timer = timer_read();
 	}
       } else {
 	if (timer_elapsed(lower_timer) > 100) {
 	  layer_off(_SYMBOL);
-	  update_tri_layer(_SYMBOL, _RAISE, _ADJUST);
+	  update_tri_layer(_SYMBOL, _ARROW, _ADJUST);
 	}
       }
       return false;
       break;
-    case RAISE:
+    case ARROW:
       if (record->event.pressed) {
-	if (layer_state_is(_RAISE)) {
+	if (layer_state_is(_ARROW)) {
 	  layer_clear();
-	  update_tri_layer(_SYMBOL, _RAISE, _ADJUST);
+	  update_tri_layer(_SYMBOL, _ARROW, _ADJUST);
 	} else {
-	  layer_on(_RAISE);
-	  update_tri_layer(_SYMBOL, _RAISE, _ADJUST);
+	  layer_on(_ARROW);
+	  update_tri_layer(_SYMBOL, _ARROW, _ADJUST);
 	  raise_timer = timer_read();
 	}
       } else {
 	if (timer_elapsed(raise_timer) > 100) {
-	  layer_off(_RAISE);
-	  update_tri_layer(_SYMBOL, _RAISE, _ADJUST);
+	  layer_off(_ARROW);
+	  update_tri_layer(_SYMBOL, _ARROW, _ADJUST);
 	}
       }
       return false;
@@ -170,11 +171,11 @@ const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS(
 );
 
 const rgblight_segment_t PROGMEM my_gui_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {0, 1, HSV_BLUE}
+    {6, 1, HSV_PURPLE}
 );
 
 const rgblight_segment_t PROGMEM my_ctrl_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {6, 1, HSV_PURPLE}
+    {0, 1, HSV_BLUE}
 );
 
 const rgblight_segment_t PROGMEM my_alt_layer[] = RGBLIGHT_LAYER_SEGMENTS(
@@ -206,7 +207,7 @@ void keyboard_post_init_user(void) {
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     rgblight_set_layer_state(0, layer_state_cmp(state, _SYMBOL));
-    rgblight_set_layer_state(1, layer_state_cmp(state, _RAISE));
+    rgblight_set_layer_state(1, layer_state_cmp(state, _ARROW));
     return state;
 }
 
