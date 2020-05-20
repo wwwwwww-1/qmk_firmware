@@ -1,6 +1,6 @@
 #include QMK_KEYBOARD_H
 
-bool queue = true;
+bool pass_esc = true;
 
 enum my_layers {
   _WORKMAN = 0,
@@ -23,6 +23,23 @@ enum {
 qk_tap_dance_action_t tap_dance_actions[] = {
   [TD_NEXT_PREV] = ACTION_TAP_DANCE_DOUBLE(KC_MNXT, KC_MPRV)
 };
+
+// Lighting layer definitions
+const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS( {5, 1, HSV_RED} );
+const rgblight_segment_t PROGMEM my_gui_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 1, HSV_PURPLE} );
+const rgblight_segment_t PROGMEM my_ctrl_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 1, HSV_BLUE} );
+const rgblight_segment_t PROGMEM my_alt_layer[] = RGBLIGHT_LAYER_SEGMENTS( {11, 1, HSV_GREEN} );
+const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 6, HSV_GOLD} );
+const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 6, HSV_SPRINGGREEN} );
+
+const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
+    my_layer1_layer,
+    my_layer2_layer,
+    my_gui_layer,
+    my_shift_layer,
+    my_ctrl_layer,
+    my_alt_layer
+);
 
 #define RGB_RMD RGB_RMOD
 #define OS_LSFT OSM(MOD_LSFT)
@@ -109,14 +126,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return false;
       break;
     case KC_ESC:
-      queue = true;
+      pass_esc = true;
       if (record->event.pressed) {
         if (get_oneshot_mods() && !has_oneshot_mods_timed_out()) {
           clear_oneshot_mods();
-          queue = false;
+          pass_esc = false;
         }
       }
-      return queue;
+      return pass_esc;
       break;
   }
   return true;
@@ -138,35 +155,6 @@ void encoder_update_user(uint8_t index, bool clockwise) {
         }
     }
 }
-
-// Lighting layer definitions
-const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {5, 1, HSV_RED}
-);
-const rgblight_segment_t PROGMEM my_gui_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {6, 1, HSV_PURPLE}
-);
-const rgblight_segment_t PROGMEM my_ctrl_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {0, 1, HSV_BLUE}
-);
-const rgblight_segment_t PROGMEM my_alt_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {11, 1, HSV_GREEN}
-);
-const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {0, 6, HSV_GOLD}
-);
-const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS(
-    {6, 6, HSV_SPRINGGREEN}
-);
-
-const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
-    my_layer1_layer,
-    my_layer2_layer,
-    my_gui_layer,
-    my_shift_layer,
-    my_ctrl_layer,
-    my_alt_layer
-);
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     rgblight_set_layer_state(0, layer_state_cmp(state, _SYMBOL));
