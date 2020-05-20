@@ -12,6 +12,7 @@
 #define OS_RALT OSM(MOD_RALT)
 #define OS_SYM OSL(_SYMBOL)
 #define TAB_AR LT(_ARROW, KC_TAB)
+#define TD_NXPR TD(TD_NEXT_PREV)
 
 uint16_t lower_timer;
 uint16_t raise_timer;
@@ -24,11 +25,16 @@ enum custom_keycodes {
   ADJUST,
 };
 
+// Tap dance keys
+enum {
+  TD_NEXT_PREV = 0
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_WORKMAN] = LAYOUT(
   //┌────────┬────────┬────────┬────────┬────────┬────────┐                          ┌────────┬────────┬────────┬────────┬────────┬────────┐
-     KC_MINS, KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                               KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_EQL,
+     TD_NXPR, KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                               KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MPLY,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
      KC_GRV,  KC_Q,    KC_D,    KC_R,    KC_W,    KC_B,                               KC_J,    KC_F,    KC_U,    KC_P,    KC_SCLN, KC_BSPC,
   //├────────┼────────┼────────┼────────┼────────┼────────┤                          ├────────┼────────┼────────┼────────┼────────┼────────┤
@@ -165,6 +171,11 @@ void encoder_update_user(uint8_t index, bool clockwise) {
         }
     }
 }
+
+// Tap dance definitions
+qk_tap_dance_action_t tap_dance_actions[] = {
+  [TD_NEXT_PREV] = ACTION_TAP_DANCE_DOUBLE(KC_MNXT, KC_MPRV)
+};
 
 const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS(
     {5, 1, HSV_RED}
