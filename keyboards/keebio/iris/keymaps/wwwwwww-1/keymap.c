@@ -241,7 +241,7 @@ void guisym_finished (qk_tap_dance_state_t *state, void *user_data) {
   guisym_tap_state.state = cur_dance(state);
   switch (guisym_tap_state.state) {
     case SINGLE_TAP: 
-      set_oneshot_mods(MOD_LGUI);
+      set_oneshot_mods(MOD_LGUI | get_oneshot_mods());
       break;
     case SINGLE_HOLD: 
       register_code(KC_LGUI);
