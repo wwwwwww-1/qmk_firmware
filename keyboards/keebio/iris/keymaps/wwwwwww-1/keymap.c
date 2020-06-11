@@ -24,13 +24,9 @@ typedef struct {
 enum {
   SINGLE_TAP = 1,
   SINGLE_HOLD = 2,
-  DOUBLE_TAP = 3
+  DOUBLE_TAP = 3,
+  DOUBLE_HOLD = 4
 };
-
-int cur_dance (qk_tap_dance_state_t *state);
-
-void guisym_finished (qk_tap_dance_state_t *state, void *user_data);
-void guisym_reset (qk_tap_dance_state_t *state, void *user_data);
 
 // Tap dance keys
 enum {
@@ -38,13 +34,16 @@ enum {
   CT_GUI_SYMBOL
 };
 
+int cur_dance (qk_tap_dance_state_t *state);
+
+void guisym_finished (qk_tap_dance_state_t *state, void *user_data);
+void guisym_reset (qk_tap_dance_state_t *state, void *user_data);
+
 // Tap dance definitions
 qk_tap_dance_action_t tap_dance_actions[] = {
   [CT_NEXT_PREV] = ACTION_TAP_DANCE_DOUBLE(KC_MNXT, KC_MPRV),
   [CT_GUI_SYMBOL] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, guisym_finished, guisym_reset, 275)
 };
-
-#define GUI_SYM TD(CT_GUI_SYMBOL)
 
 // Lighting layer definitions
 const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS( {5, 1, HSV_RED} );
@@ -71,6 +70,7 @@ const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
 #define TG_NUM TG(_NUMPAD)  //temp key, will eventually want to have a key that toggles on double tap, does something else on single tap
 #define TAB_AR LT(_ARROW, KC_TAB)
 #define TD_NXPR TD(CT_NEXT_PREV)
+#define GUI_SYM TD(CT_GUI_SYMBOL)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -84,7 +84,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //├────────┼────────┼────────┼────────┼────────┼────────┼────────┐        ┌────────┼────────┼────────┼────────┼────────┼────────┼────────┤
      TG_NUM,  KC_Z,    KC_X,    KC_M,    KC_C,    KC_V,    KC_ESC,           ADJUST,  KC_K,    KC_L,    KC_COMM, KC_DOT,  KC_SLSH, KC_BSLS,
   //└────────┴────────┴────────┴───┬────┴───┬────┴───┬────┴───┬────┘        └───┬────┴───┬────┴───┬────┴───┬────┴────────┴────────┴────────┘
-                                    OS_LCTL, OS_LSFT, KC_SPC,                    KC_ENT,  GUI_SYM, OS_RALT
+                                    OS_LCTL, GUI_SYM, KC_SPC,                    OS_LSFT,  KC_ENT, OS_RALT
                                 // └────────┴────────┴────────┘                 └────────┴────────┴────────┘
   ),
 
@@ -182,16 +182,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 void encoder_update_user(uint8_t index, bool clockwise) {
     if (index == 0) {
         if (clockwise) {
-            tap_code(KC_VOLU);
+            tap_code(KC_PGDN);
         } else {
-            tap_code(KC_VOLD);
+            tap_code(KC_PGUP);
         }
     }
     else if (index == 1) {
         if (clockwise) {
-            tap_code(KC_PGDN);
+            tap_code(KC_VOLU);
         } else {
-            tap_code(KC_PGUP);
+            tap_code(KC_VOLD);
         }
     }
 }
@@ -217,13 +217,17 @@ void keyboard_post_init_user(void) {
 
 int cur_dance (qk_tap_dance_state_t *state) {
   if (state->count == 1) {
-    if (!state->pressed) {
+    if (state->interrupted || !state->pressed) {
       return SINGLE_TAP;
     } else {
       return SINGLE_HOLD;
     }
   } else if (state->count == 2) {
-    return DOUBLE_TAP;
+    if (state->pressed) {
+      return DOUBLE_HOLD;
+    } else {
+      return DOUBLE_TAP;
+    }
   }
   else return 8;
 }
@@ -246,12 +250,20 @@ void guisym_finished (qk_tap_dance_state_t *state, void *user_data) {
       set_oneshot_layer(_SYMBOL, ONESHOT_START);
       clear_oneshot_layer_state(ONESHOT_PRESSED);
       break;
+    case DOUBLE_HOLD:
+      layer_on(_SYMBOL);
+      break;
   }
 }
 
 void guisym_reset (qk_tap_dance_state_t *state, void *user_data) {
-  if (guisym_tap_state.state==SINGLE_HOLD) {
-    unregister_code(KC_LGUI);
+  switch (guisym_tap_state.state) {
+    case SINGLE_HOLD:
+      unregister_code(KC_LGUI);
+      break;
+    case DOUBLE_HOLD:
+      layer_off(_SYMBOL);
+      break;
   }
   guisym_tap_state.state = 0;
 }
