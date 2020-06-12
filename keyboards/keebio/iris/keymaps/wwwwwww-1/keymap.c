@@ -54,10 +54,10 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [CT_GUI_SYMBOL] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, guisym_finished, guisym_reset, 200)
 };
 
-const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 1, HSV_RED} );
-const rgblight_segment_t PROGMEM my_gui_layer[] = RGBLIGHT_LAYER_SEGMENTS( {5, 1, HSV_PURPLE} );
 const rgblight_segment_t PROGMEM my_ctrl_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 1, HSV_BLUE} );
-const rgblight_segment_t PROGMEM my_alt_layer[] = RGBLIGHT_LAYER_SEGMENTS( {11, 1, HSV_GREEN} );
+const rgblight_segment_t PROGMEM my_gui_layer[] = RGBLIGHT_LAYER_SEGMENTS( {5, 1, HSV_GREEN} );
+const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 1, HSV_RED} );
+const rgblight_segment_t PROGMEM my_alt_layer[] = RGBLIGHT_LAYER_SEGMENTS( {11, 1, HSV_PURPLE} );
 const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 6, HSV_GOLD} );
 const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 6, HSV_SPRINGGREEN} );
 
