@@ -24,7 +24,7 @@ enum my_layers {
 
 enum custom_keycodes {
   WORKMAN = SAFE_RANGE,
-  ADJUST
+  ENC_MOD
 };
 
 enum tapdance_states {
@@ -70,13 +70,33 @@ const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
     my_alt_layer
 );
 
+// New encoder code
+typedef enum {
+    ENC_MODE_VOLUME = 0,
+    ENC_MODE_WORD_NAV,
+//    ENC_MODE_LEFT_RIGHT,
+//    ENC_MODE_UP_DOWN,
+//    ENC_MODE_PAGING,
+    _ENC_MODE_LAST  // Do not use, except for looping through enum values
+} encoder_mode_t;
+
+encoder_mode_t encoder_mode;
+
+void cycle_encoder_mode(bool reverse);
+void encoder_action_volume(uint8_t clockwise);
+void encoder_action_word_nav(uint8_t clockwise);
+//void encoder_action_left_right(uint8_t clockwise);
+//void encoder_action_up_down(uint8_t clockwise);
+//void encoder_action_paging(uint8_t clockwise);
+void encoder_action(encoder_mode_t mode, uint8_t clockwise);
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_WORKMAN] = LAYOUT(
     TD_NXPR, KC_1, KC_2, KC_3, KC_4, KC_5,                  KC_6, KC_7, KC_8,    KC_9,   KC_0,    KC_MPLY,
     KC_GRV,  KC_Q, KC_D, KC_R, KC_W, KC_B,                  KC_J, KC_F, KC_U,    KC_P,   KC_SCLN, KC_BSPC,
     TAB_AR,  KC_A, KC_S, KC_H, KC_T, KC_G,                  KC_Y, KC_N, KC_E,    KC_O,   KC_I,    KC_QUOT,
-    TG_NUM,  KC_Z, KC_X, KC_M, KC_C, KC_V, KC_ESC,  ADJUST, KC_K, KC_L, KC_COMM, KC_DOT, KC_SLSH, KC_BSLS,
+    TG_NUM,  KC_Z, KC_X, KC_M, KC_C, KC_V, KC_ESC, ENC_MOD, KC_K, KC_L, KC_COMM, KC_DOT, KC_SLSH, KC_BSLS,
                       OS_LCTL, GUI_SYM, KC_SPC,        OS_LSFT, KC_ENT, OS_RALT
   ),
 
@@ -91,7 +111,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [_ARROW] = LAYOUT(
     _______, ____, ____, ____, ____, ____,                  _______, _______, _______, _______, ____, _______,
     _______, ____, ____, ____, ____, ____,                  _______, KC_HOME, KC_END,  _______, ____, _______,
-    _______, ____, ____, ____, ____, ____,                  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, ____, _______,
+    _______, ____, ____, ____, ____, ____,                  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, ____, MO(_ADJUST),
     _______, ____, ____, ____, ____, ____, ______,  ______, _______, KC_PGDN, KC_PGUP, _______, ____, _______,
                     _______, _______, _______,         _______, _______, _______
   ),
@@ -121,14 +141,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return false;
       break;
-    case ADJUST:
-      if (record->event.pressed) {
-        layer_on(_ADJUST);
-      } else {
-        layer_off(_ADJUST);
-      }
-      return false;
-      break;
     case KC_ESC:
       pass_esc = true;
       if (record->event.pressed) {
@@ -143,6 +155,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       return pass_esc;
       break;
+    case ENC_MOD:
+      if (record->event.pressed) {
+        cycle_encoder_mode(false);
+      }
+      return false;
+      break;
   }
   return true;
 }
@@ -156,11 +174,7 @@ void encoder_update_user(uint8_t index, bool clockwise) {
         }
     }
     else if (index == 1) {
-        if (clockwise) {
-            tap_code(KC_VOLU);
-        } else {
-            tap_code(KC_VOLD);
-        }
+        encoder_action(encoder_mode, clockwise);
     }
 }
 
@@ -178,6 +192,7 @@ void oneshot_mods_changed_user(uint8_t mods) {
 }
 
 void keyboard_post_init_user(void) {
+    encoder_mode = ENC_MODE_VOLUME;
     rgblight_layers = my_rgb_layers;
     set_single_persistent_default_layer(_WORKMAN);
     layer_clear();
@@ -235,5 +250,52 @@ void guisym_reset (qk_tap_dance_state_t *state, void *user_data) {
       break;
   }
   guisym_tap_state.state = 0;
+}
+
+// New encoder code
+void cycle_encoder_mode(bool reverse) {
+    if (reverse) {
+        encoder_mode = (encoder_mode == 0) ? (_ENC_MODE_LAST - 1) : (encoder_mode - 1);
+    } else {
+        encoder_mode = (encoder_mode == (_ENC_MODE_LAST - 1)) ? 0 : (encoder_mode + 1);
+    }
+}
+
+void encoder_action_volume(uint8_t clockwise) {
+    if (clockwise) {
+        tap_code(KC_VOLU);
+    } else {
+        tap_code(KC_VOLD);
+    }
+}
+
+void encoder_action_word_nav(uint8_t clockwise) {
+    if (clockwise) {
+        tap_code16(C(KC_RIGHT));
+    } else {
+        tap_code16(C(KC_LEFT));
+    }
+}
+
+void encoder_action(encoder_mode_t mode, uint8_t clockwise) {
+    switch (mode) {
+        case ENC_MODE_VOLUME:
+            encoder_action_volume(clockwise);
+            break;
+        case ENC_MODE_WORD_NAV:
+            encoder_action_word_nav(clockwise);
+            break;
+//        case ENC_MODE_LEFT_RIGHT:
+//            encoder_action_left_right(clockwise);
+//            break;
+//        case ENC_MODE_UP_DOWN:
+//            encoder_action_up_down(clockwise);
+//            break;
+//        case ENC_MODE_PAGING:
+//            encoder_action_paging(clockwise);
+//            break;
+        default:
+            encoder_action_volume(clockwise);
+    }
 }
 
