@@ -58,9 +58,9 @@ const rgblight_segment_t PROGMEM my_ctrl_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 
 const rgblight_segment_t PROGMEM my_gui_layer[] = RGBLIGHT_LAYER_SEGMENTS( {5, 1, HSV_GREEN} );
 const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 1, HSV_RED} );
 const rgblight_segment_t PROGMEM my_alt_layer[] = RGBLIGHT_LAYER_SEGMENTS( {11, 1, HSV_PURPLE} );
-const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 6, HSV_GOLD} );
-const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 6, HSV_SPRINGGREEN} );
-const rgblight_segment_t PROGMEM my_enc1_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 1, HSV_CHARTREUSE} );
+const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 6, 36, 255, 90} );
+const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 6, 106, 255, 90} );
+const rgblight_segment_t PROGMEM my_enc1_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 1, 64, 255, 128} );
 
 const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
     my_layer1_layer,
