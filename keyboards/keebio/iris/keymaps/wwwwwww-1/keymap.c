@@ -60,34 +60,30 @@ const rgblight_segment_t PROGMEM my_shift_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6,
 const rgblight_segment_t PROGMEM my_alt_layer[] = RGBLIGHT_LAYER_SEGMENTS( {11, 1, HSV_PURPLE} );
 const rgblight_segment_t PROGMEM my_layer1_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 6, HSV_GOLD} );
 const rgblight_segment_t PROGMEM my_layer2_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 6, HSV_SPRINGGREEN} );
+const rgblight_segment_t PROGMEM my_enc1_layer[] = RGBLIGHT_LAYER_SEGMENTS( {6, 1, HSV_CHARTREUSE} );
 
 const rgblight_segment_t* const PROGMEM my_rgb_layers[] = RGBLIGHT_LAYERS_LIST(
     my_layer1_layer,
     my_layer2_layer,
+    my_enc1_layer,
     my_gui_layer,
     my_shift_layer,
     my_ctrl_layer,
     my_alt_layer
 );
 
-// New encoder code
 typedef enum {
     ENC_MODE_VOLUME = 0,
     ENC_MODE_WORD_NAV,
-//    ENC_MODE_LEFT_RIGHT,
-//    ENC_MODE_UP_DOWN,
-//    ENC_MODE_PAGING,
     _ENC_MODE_LAST  // Do not use, except for looping through enum values
 } encoder_mode_t;
 
 encoder_mode_t encoder_mode;
 
+void set_encoder_mode(encoder_mode_t mode);
 void cycle_encoder_mode(bool reverse);
 void encoder_action_volume(uint8_t clockwise);
 void encoder_action_word_nav(uint8_t clockwise);
-//void encoder_action_left_right(uint8_t clockwise);
-//void encoder_action_up_down(uint8_t clockwise);
-//void encoder_action_paging(uint8_t clockwise);
 void encoder_action(encoder_mode_t mode, uint8_t clockwise);
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -185,17 +181,20 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 }
 
 void oneshot_mods_changed_user(uint8_t mods) {
-    rgblight_set_layer_state(2, mods & MOD_MASK_GUI);
-    rgblight_set_layer_state(3, mods & MOD_MASK_SHIFT);
-    rgblight_set_layer_state(4, mods & MOD_MASK_CTRL);
-    rgblight_set_layer_state(5, mods & MOD_MASK_ALT);
+    rgblight_set_layer_state(3, mods & MOD_MASK_GUI);
+    rgblight_set_layer_state(4, mods & MOD_MASK_SHIFT);
+    rgblight_set_layer_state(5, mods & MOD_MASK_CTRL);
+    rgblight_set_layer_state(6, mods & MOD_MASK_ALT);
 }
 
 void keyboard_post_init_user(void) {
-    encoder_mode = ENC_MODE_VOLUME;
     rgblight_layers = my_rgb_layers;
     set_single_persistent_default_layer(_WORKMAN);
     layer_clear();
+    rgblight_enable_noeeprom();
+    rgblight_sethsv_noeeprom(8, 8, 20);
+    rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
+    set_encoder_mode(ENC_MODE_VOLUME);
 }
 
 int cur_dance (qk_tap_dance_state_t *state) {
@@ -252,13 +251,14 @@ void guisym_reset (qk_tap_dance_state_t *state, void *user_data) {
   guisym_tap_state.state = 0;
 }
 
-// New encoder code
 void cycle_encoder_mode(bool reverse) {
+    encoder_mode_t mode = encoder_mode;
     if (reverse) {
-        encoder_mode = (encoder_mode == 0) ? (_ENC_MODE_LAST - 1) : (encoder_mode - 1);
+        mode = (mode == 0) ? (_ENC_MODE_LAST - 1) : (mode - 1);
     } else {
-        encoder_mode = (encoder_mode == (_ENC_MODE_LAST - 1)) ? 0 : (encoder_mode + 1);
+        mode = (mode == (_ENC_MODE_LAST - 1)) ? 0 : (mode + 1);
     }
+    set_encoder_mode(mode);
 }
 
 void encoder_action_volume(uint8_t clockwise) {
@@ -285,17 +285,22 @@ void encoder_action(encoder_mode_t mode, uint8_t clockwise) {
         case ENC_MODE_WORD_NAV:
             encoder_action_word_nav(clockwise);
             break;
-//        case ENC_MODE_LEFT_RIGHT:
-//            encoder_action_left_right(clockwise);
-//            break;
-//        case ENC_MODE_UP_DOWN:
-//            encoder_action_up_down(clockwise);
-//            break;
-//        case ENC_MODE_PAGING:
-//            encoder_action_paging(clockwise);
-//            break;
         default:
             encoder_action_volume(clockwise);
     }
+}
+
+void set_encoder_mode(encoder_mode_t mode) {
+    switch (mode) {
+        case ENC_MODE_VOLUME:
+            rgblight_set_layer_state(2, false);
+            break;
+        case ENC_MODE_WORD_NAV:
+            rgblight_set_layer_state(2, true);
+            break;
+        default:
+            rgblight_set_layer_state(2, false);
+    }
+    encoder_mode = mode;
 }
 
