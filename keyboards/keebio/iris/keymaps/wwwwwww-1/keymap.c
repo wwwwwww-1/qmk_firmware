@@ -3,14 +3,14 @@
 #define ____    KC_TRNS
 #define ______  KC_TRNS
 #define RGB_RMD RGB_RMOD
-#define OS_LSFT OSM(MOD_LSFT)
-#define OS_LCTL OSM(MOD_LCTL)
-#define OS_RGUI OSM(MOD_RGUI)
-#define OS_RALT OSM(MOD_RALT)
+#define OS_SFT OSM(MOD_LSFT)
+#define OS_CTL OSM(MOD_LCTL)
+#define OS_GUI OSM(MOD_LGUI)
+#define OS_ALT OSM(MOD_LALT)
 #define TG_NUM  TG(_NUMPAD) //temp key, will eventually want to do more than just toggle layer
 #define TAB_AR  LT(_ARROW, KC_TAB)
 #define TD_NXPR TD(CT_NEXT_PREV)
-#define GUI_SYM TD(CT_GUI_SYMBOL)
+#define SFT_SYM TD(CT_SFT_SYMBOL)
 
 static bool pass_esc = true;
 
@@ -19,6 +19,7 @@ enum my_layers {
   _NUMPAD,
   _ARROW,
   _SYMBOL,
+  _SHMUP,
   _ADJUST
 };
 
@@ -36,7 +37,7 @@ enum tapdance_states {
 
 enum tapdance_keycodes {
   CT_NEXT_PREV = 0,
-  CT_GUI_SYMBOL
+  CT_SFT_SYMBOL
 };
 
 typedef struct {
@@ -46,12 +47,12 @@ typedef struct {
 
 int cur_dance (qk_tap_dance_state_t *state);
 
-void guisym_finished (qk_tap_dance_state_t *state, void *user_data);
-void guisym_reset (qk_tap_dance_state_t *state, void *user_data);
+void sftsym_finished (qk_tap_dance_state_t *state, void *user_data);
+void sftsym_reset (qk_tap_dance_state_t *state, void *user_data);
 
 qk_tap_dance_action_t tap_dance_actions[] = {
   [CT_NEXT_PREV] = ACTION_TAP_DANCE_DOUBLE(KC_MNXT, KC_MPRV),
-  [CT_GUI_SYMBOL] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, guisym_finished, guisym_reset, 200)
+  [CT_SFT_SYMBOL] = ACTION_TAP_DANCE_FN_ADVANCED_TIME(NULL, sftsym_finished, sftsym_reset, 200)
 };
 
 const rgblight_segment_t PROGMEM my_ctrl_layer[] = RGBLIGHT_LAYER_SEGMENTS( {0, 1, HSV_BLUE} );
@@ -93,22 +94,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     KC_GRV,  KC_Q, KC_D, KC_R, KC_W, KC_B,                  KC_J, KC_F, KC_U,    KC_P,   KC_SCLN, KC_BSPC,
     TAB_AR,  KC_A, KC_S, KC_H, KC_T, KC_G,                  KC_Y, KC_N, KC_E,    KC_O,   KC_I,    KC_QUOT,
     TG_NUM,  KC_Z, KC_X, KC_M, KC_C, KC_V, KC_ESC, ENC_MOD, KC_K, KC_L, KC_COMM, KC_DOT, KC_SLSH, KC_BSLS,
-                      OS_LCTL, GUI_SYM, KC_SPC,        OS_LSFT, KC_ENT, OS_RALT
+                        OS_CTL, OS_GUI, KC_SPC,       SFT_SYM, KC_ENT, OS_ALT
   ),
 
   [_NUMPAD] = LAYOUT(
     _______, ____, ____, ____, ____, ____,                  ____, ______, ______, ______, _______, _______,
-    _______, ____, ____, ____, ____, ____,                  ____, KC_P7,  KC_P8,  KC_P9,  KC_EQL,  _______,
-    _______, ____, ____, ____, ____, ____,                  ____, KC_P4,  KC_P5,  KC_P6,  KC_PLUS, _______,
-    _______, ____, ____, ____, ____, ____, ______,  ______, ____, KC_P1,  KC_P2,  KC_P3,  KC_MINS, _______,
-                    _______, _______, _______,         _______, _______, KC_P0
+    _______, ____, ____, ____, ____, ____,                  ____, KC_7,   KC_8,   KC_9,   KC_EQL,  _______,
+    _______, ____, ____, ____, ____, ____,                  ____, KC_4,   KC_5,   KC_6,   KC_PLUS, _______,
+    _______, ____, ____, ____, ____, ____, ______,  ______, ____, KC_1,   KC_2,   KC_3,   KC_MINS, _______,
+                    _______, _______, _______,         _______, _______, KC_0
   ),
 
   [_ARROW] = LAYOUT(
     _______, ____, ____, ____, ____, ____,                  _______, _______, _______, _______, ____, _______,
     _______, ____, ____, ____, ____, ____,                  _______, KC_HOME, KC_END,  _______, ____, _______,
     _______, ____, ____, ____, ____, ____,                  KC_LEFT, KC_DOWN, KC_UP,   KC_RGHT, ____, MO(_ADJUST),
-    _______, ____, ____, ____, ____, ____, ______,  ______, _______, KC_PGDN, KC_PGUP, _______, ____, _______,
+    _______, ____, ____, ____, ____, ____, ______,  ______, _______, KC_PGDN, KC_PGUP, _______, ____, TG(_SHMUP),
                     _______, _______, _______,         _______, _______, _______
   ),
 
@@ -118,6 +119,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ____, _______, ______, KC_EQL,  KC_MINS, KC_LBRC,              KC_RBRC, _______, _______, _______, _______, _______,
     ____, _______, ______, KC_PLUS, KC_UNDS, KC_LCBR, ____,  ____, KC_RCBR, _______, _______, _______, _______, _______,
                               _______, _______, _______,       _______, _______, _______
+  ),
+
+  [_SHMUP] = LAYOUT(
+    _______, ____, ____, ____, ____, ____,                  _______, _______, _______, _______, ____, _______,
+    _______, ____, ____, ____, ____, ____,                  _______, _______, KC_UP,   _______, ____, _______,
+    _______, ____, ____, KC_LSFT, KC_Z, ____,                  _______, KC_LEFT, KC_DOWN, KC_RGHT, ____, _______,
+    _______, ____, ____, ____, ____, ____, ______,  ______, _______, _______, _______, _______, ____, _______,
+                    _______, _______, KC_X,           _______, _______, _______
   ),
 
   [_ADJUST] = LAYOUT(
@@ -174,6 +183,7 @@ void encoder_update_user(uint8_t index, bool clockwise) {
     }
 }
 
+// RGB layers
 layer_state_t layer_state_set_user(layer_state_t state) {
     rgblight_set_layer_state(0, layer_state_cmp(state, _SYMBOL));
     rgblight_set_layer_state(1, layer_state_cmp(state, _NUMPAD));
@@ -187,6 +197,7 @@ void oneshot_mods_changed_user(uint8_t mods) {
     rgblight_set_layer_state(6, mods & MOD_MASK_ALT);
 }
 
+// Keyboard init code
 void keyboard_post_init_user(void) {
     rgblight_layers = my_rgb_layers;
     set_single_persistent_default_layer(_WORKMAN);
@@ -197,6 +208,7 @@ void keyboard_post_init_user(void) {
     set_encoder_mode(ENC_MODE_VOLUME);
 }
 
+// Tapdance functions
 int cur_dance (qk_tap_dance_state_t *state) {
   if (state->count == 1) {
     if (!state->pressed) {
@@ -214,20 +226,20 @@ int cur_dance (qk_tap_dance_state_t *state) {
   else return 8;
 }
 
-// GUI_SYM tapdance functions
-static tap guisym_tap_state = {
+// GUI_SYM
+static tap sftsym_tap_state = {
   .is_press_action = true,
   .state = 0
 };
 
-void guisym_finished (qk_tap_dance_state_t *state, void *user_data) {
-  guisym_tap_state.state = cur_dance(state);
-  switch (guisym_tap_state.state) {
+void sftsym_finished (qk_tap_dance_state_t *state, void *user_data) {
+  sftsym_tap_state.state = cur_dance(state);
+  switch (sftsym_tap_state.state) {
     case SINGLE_TAP: 
-      set_oneshot_mods(MOD_LGUI | get_oneshot_mods());
+      set_oneshot_mods(MOD_LSFT | get_oneshot_mods());
       break;
     case SINGLE_HOLD: 
-      register_code(KC_LGUI);
+      register_code(KC_LSFT);
       break;
     case DOUBLE_TAP: 
       set_oneshot_layer(_SYMBOL, ONESHOT_START);
@@ -239,18 +251,19 @@ void guisym_finished (qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void guisym_reset (qk_tap_dance_state_t *state, void *user_data) {
-  switch (guisym_tap_state.state) {
+void sftsym_reset (qk_tap_dance_state_t *state, void *user_data) {
+  switch (sftsym_tap_state.state) {
     case SINGLE_HOLD:
-      unregister_code(KC_LGUI);
+      unregister_code(KC_LSFT);
       break;
     case DOUBLE_HOLD:
       layer_off(_SYMBOL);
       break;
   }
-  guisym_tap_state.state = 0;
+  sftsym_tap_state.state = 0;
 }
 
+// Encoder functions
 void cycle_encoder_mode(bool reverse) {
     encoder_mode_t mode = encoder_mode;
     if (reverse) {
